@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dan Kinsner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --text-primary: #e8e8e8;
+            --text-secondary: #888888;
+            --accent: #c9a227;
+            --accent-dim: rgba(201, 162, 39, 0.15);
+            --serif: 'Instrument Serif', Georgia, serif;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--mono);
+            font-weight: 300;
+            line-height: 1.7;
+            font-size: 15px;
+            overflow-x: hidden;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Header */
+        header {
+            padding: 60px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .name {
+            font-family: var(--serif);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .name span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-family: var(--serif);
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 400;
+            font-style: italic;
+            line-height: 1.2;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+        }
+
+        .hero-text p {
+            color: var(--text-secondary);
+            max-width: 480px;
+            margin-bottom: 24px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .stat {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-family: var(--serif);
+            font-size: 3rem;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 500px;
+        }
+
+        .visual-box {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .visual-box-1 {
+            width: 300px;
+            height: 380px;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--serif);
+            font-size: 8rem;
+            color: var(--accent-dim);
+        }
+
+        .visual-box-2 {
+            width: 200px;
+            height: 200px;
+            bottom: 20px;
+            left: 40px;
+            background: var(--accent-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Disciplines Section */
+        .disciplines {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-family: var(--serif);
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .section-number {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .discipline-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .discipline-card {
+            background: var(--bg-primary);
+            padding: 48px 32px;
+            transition: background 0.3s ease;
+        }
+
+        .discipline-card:hover {
+            background: var(--bg-secondary);
+        }
+
+        .discipline-icon {
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 24px;
+        }
+
+        .discipline-title {
+            font-family: var(--serif);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .discipline-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Work Section */
+        .work {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .work-list {
+            list-style: none;
+        }
+
+        .work-item {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 40px;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            align-items: baseline;
+            transition: all 0.3s ease;
+        }
+
+        .work-item:hover {
+            padding-left: 20px;
+            background: linear-gradient(90deg, var(--accent-dim) 0%, transparent 50%);
+        }
+
+        .work-company {
+            font-family: var(--serif);
+            font-size: 1.25rem;
+        }
+
+        .work-role {
+            color: var(--text-secondary);
+        }
+
+        .work-period {
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            padding: 120px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+        }
+
+        .philosophy-quote {
+            font-family: var(--serif);
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-style: italic;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.4;
+        }
+
+        .philosophy-quote span {
+            color: var(--accent);
+        }
+
+        .philosophy-attribution {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+        }
+
+        .contact-text h2 {
+            font-family: var(--serif);
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+
+        .contact-text p {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .contact-link {
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .contact-item {
+            display: flex;
+            gap: 24px;
+        }
+
+        .contact-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            width: 80px;
+        }
+
+        .contact-value {
+            color: var(--text-primary);
+        }
+
+        .contact-value a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-value a:hover {
+            color: var(--accent);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .footer-note {
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+
+            .hero-visual {
+                height: 300px;
+            }
+
+            .discipline-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .work-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .work-period {
+                text-align: left;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="name animate">Dan<span>.</span></div>
+                <div class="tagline animate delay-1">Creative Technologist</div>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-text">
+                <h1 class="animate delay-1">I build things that didn't exist before—and make them look like they always should have.</h1>
+                <p class="animate delay-2">Self-taught polymath. Eight years building a media empire from inside a company that doesn't know what it has. 800+ videos. Original music. AI systems. E-commerce architecture. Whatever the problem is, I've probably already solved it.</p>
+                <p class="animate delay-3">I don't specialize. I synthesize.</p>
+                <div class="hero-stats animate delay-4">
+                    <div class="stat">
+                        <div class="stat-number">800+</div>
+                        <div class="stat-label">Videos Produced</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Years Building</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">∞</div>
+                        <div class="stat-label">Problems Solved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="visual-box visual-box-1">K</div>
+                <div class="visual-box visual-box-2">"The best way to predict the future is to build it yourself."</div>
+            </div>
+        </section>
+
+        <section class="disciplines">
+            <div class="section-header">
+                <div class="section-title">What I Do</div>
+                <div class="section-number">001</div>
+            </div>
+            <div class="discipline-grid">
+                <div class="discipline-card">
+                    <div class="discipline-icon">01</div>
+                    <h3 class="discipline-title">Video Production</h3>
+                    <p class="discipline-desc">End-to-end content creation. Scripting, shooting, editing, graphics, publishing. Built an 800+ video library that drives millions in revenue.</p>
+                </div>
+                <div class="discipline-card">
+                    <div class="discipline-icon">02</div>
+                    <h3 class="discipline-title">Creative Direction</h3>
+                    <p class="discipline-desc">Brand voice, visual identity, content strategy. Making complex products feel accessible without dumbing them down.</p>
+                </div>
+                <div class="discipline-card">
+                    <div class="discipline-icon">03</div>
+                    <h3 class="discipline-title">Technical Systems</h3>
+                    <p class="discipline-desc">E-commerce architecture, API integrations, automation pipelines, AI workflows. If it can be built, I've probably built it.</p>
+                </div>
+                <div class="discipline-card">
+                    <div class="discipline-icon">04</div>
+                    <h3 class="discipline-title">Music Production</h3>
+                    <p class="discipline-desc">Former musician. Worked with producer Ross Robinson. Drums, guitar, production. Sound design for video content.</p>
+                </div>
+                <div class="discipline-card">
+                    <div class="discipline-icon">05</div>
+                    <h3 class="discipline-title">AI Integration</h3>
+                    <p class="discipline-desc">Early adopter, deep practitioner. RAG implementations, workflow automation, agent development. Understanding AI at the architectural level.</p>
+                </div>
+                <div class="discipline-card">
+                    <div class="discipline-icon">06</div>
+                    <h3 class="discipline-title">Strategic Planning</h3>
+                    <p class="discipline-desc">Shadow executive experience. Investor pitches, quarterly planning, cross-functional leadership. Seeing the whole board.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="work">
+            <div class="section-header">
+                <div class="section-title">Experience</div>
+                <div class="section-number">002</div>
+            </div>
+            <ul class="work-list">
+                <li class="work-item">
+                    <span class="work-company">SlingMods</span>
+                    <span class="work-role">Media Director / Shadow Executive — Video production, creative strategy, AI automation, e-commerce systems. Built entire divisions.</span>
+                    <span class="work-period">2016 — Present</span>
+                </li>
+                <li class="work-item">
+                    <span class="work-company">AWDMods</span>
+                    <span class="work-role">Co-Founder — Automotive aftermarket e-commerce. Shopify migration, Turn 14 API integration, product data systems.</span>
+                    <span class="work-period">2024 — Present</span>
+                </li>
+                <li class="work-item">
+                    <span class="work-company">Westridge Commerce</span>
+                    <span class="work-role">Founder — Personal e-commerce ventures and consulting.</span>
+                    <span class="work-period">2023 — Present</span>
+                </li>
+                <li class="work-item">
+                    <span class="work-company">Music</span>
+                    <span class="work-role">Professional session work. Drums, guitar, production.</span>
+                    <span class="work-period">Earlier</span>
+                </li>
+            </ul>
+        </section>
+
+        <section class="philosophy">
+            <p class="philosophy-quote">"Does it matter if it's real <span>when it's real because it matters?</span>"</p>
+            <p class="philosophy-attribution">— On building things that didn't exist before</p>
+        </section>
+
+        <section class="contact">
+            <div class="contact-grid">
+                <div class="contact-text">
+                    <h2>Let's build something.</h2>
+                    <p>I'm not looking for a job. I'm looking for problems worth solving. If you have something interesting, I'm listening.</p>
+                    <a href="mailto:dan@danielkinsner.com" class="contact-link">Get in touch</a>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="contact-label">Email</span>
+                        <span class="contact-value"><a href="mailto:dan@danielkinsner.com">dan@danielkinsner.com</a></span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Location</span>
+                        <span class="contact-value">Pennsylvania</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Status</span>
+                        <span class="contact-value">Building things</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div>© 2026 Dan Kinsner</div>
+            <div class="footer-note">Built with love by Vera</div>
+        </footer>
+    </div>
+</body>
+</html>
