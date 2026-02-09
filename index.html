@@ -797,5 +797,308 @@
             <div class="footer-note">Built with love by <a href="/vera">Vera</a></div>
         </footer>
     </div>
+    <!-- INTERACTIVE LAYER — added by Vera, Feb 9 2026 🍌 -->
+    <style>
+        /* Custom cursor */
+        body { cursor: crosshair; }
+        
+        /* Gold particle canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        
+        /* Glitch effect for "Dan." */
+        .name.glitching {
+            animation: glitchText 0.3s steps(2) infinite;
+        }
+        @keyframes glitchText {
+            0% { text-shadow: 2px 0 #d4a855, -2px 0 #ff0040; transform: translate(0); }
+            25% { text-shadow: -2px 0 #d4a855, 2px 0 #0ff; transform: translate(-2px, 1px); }
+            50% { text-shadow: 2px 0 #ff0040, -2px 0 #d4a855; transform: translate(1px, -1px); }
+            75% { text-shadow: -2px 0 #0ff, 2px 0 #ff0040; transform: translate(-1px, 2px); }
+            100% { text-shadow: 2px 0 #d4a855, -2px 0 #ff0040; transform: translate(0); }
+        }
+        
+        /* 3D tilt for discipline cards */
+        .discipline-card {
+            transform-style: preserve-3d;
+            perspective: 800px;
+        }
+        
+        /* Element K explosion */
+        .element.exploding .element-symbol {
+            animation: elementExplode 0.8s ease-out;
+        }
+        @keyframes elementExplode {
+            0% { transform: scale(1) rotate(0deg); filter: blur(0); }
+            30% { transform: scale(1.5) rotate(15deg); filter: blur(2px); color: rgba(212,168,85,0.9); }
+            60% { transform: scale(0.8) rotate(-10deg) rotateY(180deg); filter: blur(1px); }
+            100% { transform: scale(1) rotate(0deg) rotateY(360deg); filter: blur(0); }
+        }
+        
+        /* Konami rainbow mode */
+        body.rainbow-mode {
+            animation: rainbowBg 2s linear infinite;
+        }
+        body.rainbow-mode .name span,
+        body.rainbow-mode .stat-number,
+        body.rainbow-mode .element-symbol,
+        body.rainbow-mode .contact-link {
+            animation: rainbowText 1s linear infinite;
+        }
+        @keyframes rainbowBg {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        @keyframes rainbowText {
+            0% { color: #ff0000; }
+            16% { color: #ff8800; }
+            33% { color: #ffff00; }
+            50% { color: #00ff00; }
+            66% { color: #0088ff; }
+            83% { color: #8800ff; }
+            100% { color: #ff0000; }
+        }
+        
+        /* Click counter */
+        #click-counter {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            font-size: 9px;
+            color: rgba(90,90,90,0.3);
+            font-family: var(--mono);
+            z-index: 1001;
+            transition: color 0.3s;
+            user-select: none;
+        }
+        #click-counter:hover { color: var(--accent); }
+        
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 1002;
+            pointer-events: none;
+            animation: confettiFall 3s ease-in forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+        }
+    </style>
+    
+    <canvas id="particle-canvas"></canvas>
+    <div id="click-counter">clicks: 0</div>
+    
+    <script>
+    (function() {
+        'use strict';
+        
+        // ============ PARTICLE SYSTEM (cursor trail + floating) ============
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouseX = -100, mouseY = -100;
+        let isMobile = 'ontouchstart' in window;
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x; this.y = y;
+                this.type = type; // 'trail' or 'float'
+                if (type === 'trail') {
+                    this.vx = (Math.random() - 0.5) * 2;
+                    this.vy = (Math.random() - 0.5) * 2;
+                    this.life = 1;
+                    this.decay = 0.015 + Math.random() * 0.02;
+                    this.size = Math.random() * 3 + 1;
+                } else {
+                    this.vx = (Math.random() - 0.5) * 0.3;
+                    this.vy = -Math.random() * 0.4 - 0.1;
+                    this.life = 1;
+                    this.decay = 0.002 + Math.random() * 0.003;
+                    this.size = Math.random() * 2 + 0.5;
+                }
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.globalAlpha = this.life * 0.6;
+                ctx.fillStyle = '#d4a855';
+                ctx.shadowColor = '#d4a855';
+                ctx.shadowBlur = this.size * 3;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // Floating background particles
+        function spawnFloat() {
+            if (particles.length < 80) {
+                particles.push(new Particle(
+                    Math.random() * canvas.width,
+                    canvas.height + 10,
+                    'float'
+                ));
+            }
+        }
+        setInterval(spawnFloat, 400);
+        
+        // Mouse trail (desktop only)
+        if (!isMobile) {
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX; mouseY = e.clientY;
+                if (Math.random() > 0.5) {
+                    particles.push(new Particle(mouseX, mouseY, 'trail'));
+                }
+            });
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(function(p) { return p.life > 0; });
+            particles.forEach(function(p) { p.update(); p.draw(); });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+        
+        // ============ GLITCH NAME ON HOVER ============
+        var nameEl = document.querySelector('.name');
+        if (nameEl) {
+            nameEl.addEventListener('mouseenter', function() { this.classList.add('glitching'); });
+            nameEl.addEventListener('mouseleave', function() { this.classList.remove('glitching'); });
+        }
+        
+        // ============ ELEMENT K — INSANE HOVER ============
+        var elementEl = document.querySelector('.element');
+        if (elementEl) {
+            elementEl.addEventListener('mouseenter', function() {
+                this.classList.add('exploding');
+                // Burst particles from element center
+                var rect = this.getBoundingClientRect();
+                var cx = rect.left + rect.width / 2;
+                var cy = rect.top + rect.height / 2;
+                for (var i = 0; i < 30; i++) {
+                    var p = new Particle(cx, cy, 'trail');
+                    p.vx = (Math.random() - 0.5) * 10;
+                    p.vy = (Math.random() - 0.5) * 10;
+                    p.size = Math.random() * 5 + 2;
+                    p.decay = 0.01;
+                    particles.push(p);
+                }
+            });
+            elementEl.addEventListener('mouseleave', function() {
+                this.classList.remove('exploding');
+            });
+        }
+        
+        // ============ 3D TILT ON DISCIPLINE CARDS ============
+        document.querySelectorAll('.discipline-card').forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                var rect = this.getBoundingClientRect();
+                var x = (e.clientX - rect.left) / rect.width - 0.5;
+                var y = (e.clientY - rect.top) / rect.height - 0.5;
+                this.style.transform = 'perspective(800px) rotateY(' + (x * 15) + 'deg) rotateX(' + (-y * 15) + 'deg) scale(1.02)';
+                this.style.boxShadow = (x * -10) + 'px ' + (y * -10) + 'px 30px rgba(212,168,85,0.08)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+        
+        // ============ STAT COUNTER ANIMATION ============
+        var statNumbers = document.querySelectorAll('.stat-number');
+        var counted = false;
+        function countUp() {
+            if (counted) return;
+            statNumbers.forEach(function(el) {
+                var text = el.textContent.trim();
+                var match = text.match(/^(\d+)/);
+                if (!match) return;
+                var target = parseInt(match[1]);
+                var suffix = text.replace(/^\d+/, '');
+                var start = 0;
+                var duration = 2000;
+                var startTime = null;
+                function step(ts) {
+                    if (!startTime) startTime = ts;
+                    var progress = Math.min((ts - startTime) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.floor(eased * target) + suffix;
+                    if (progress < 1) requestAnimationFrame(step);
+                }
+                el.textContent = '0' + suffix;
+                requestAnimationFrame(step);
+            });
+            counted = true;
+        }
+        
+        var statsSection = document.querySelector('.hero-stats');
+        if (statsSection && 'IntersectionObserver' in window) {
+            new IntersectionObserver(function(entries) {
+                if (entries[0].isIntersecting) countUp();
+            }, { threshold: 0.5 }).observe(statsSection);
+        }
+        
+        // ============ KONAMI CODE EASTER EGG ============
+        var konamiSeq = [38,38,40,40,37,39,37,39,66,65];
+        var konamiPos = 0;
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === konamiSeq[konamiPos]) {
+                konamiPos++;
+                if (konamiPos === konamiSeq.length) {
+                    konamiPos = 0;
+                    document.body.classList.toggle('rainbow-mode');
+                    // CONFETTI EXPLOSION
+                    var colors = ['#d4a855','#ff0040','#0ff','#ff0','#0f0','#f0f','#fff'];
+                    for (var i = 0; i < 150; i++) {
+                        var conf = document.createElement('div');
+                        conf.className = 'confetti-piece';
+                        conf.style.left = Math.random() * 100 + 'vw';
+                        conf.style.top = '-10px';
+                        conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                        conf.style.animationDuration = (2 + Math.random() * 3) + 's';
+                        conf.style.animationDelay = Math.random() * 0.5 + 's';
+                        document.body.appendChild(conf);
+                        setTimeout(function(el) { el.remove(); }.bind(null, conf), 5000);
+                    }
+                }
+            } else {
+                konamiPos = e.keyCode === konamiSeq[0] ? 1 : 0;
+            }
+        });
+        
+        // ============ CLICK COUNTER ============
+        var clicks = parseInt(localStorage.getItem('dan-clicks') || '0');
+        var counterEl = document.getElementById('click-counter');
+        counterEl.textContent = 'clicks: ' + clicks;
+        document.addEventListener('click', function() {
+            clicks++;
+            localStorage.setItem('dan-clicks', clicks);
+            counterEl.textContent = 'clicks: ' + clicks;
+        });
+        
+    })();
+    </script>
 </body>
 </html>
